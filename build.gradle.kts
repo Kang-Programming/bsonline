@@ -1,95 +1,78 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
-	id("org.springframework.boot") version "3.4.4"
-	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
-	kotlin("plugin.jpa") version "1.9.25"
-	kotlin("kapt") version "2.1.20"
+	kotlin("jvm") version "2.1.20" apply false
+	id("org.jetbrains.kotlin.kapt") version "2.1.20" apply false
+	id("org.springframework.boot") version "3.4.4" apply false
+	id("io.spring.dependency-management") version "1.1.7" apply false
+	kotlin("plugin.jpa") version "2.1.20" apply false
 }
 
-group = "com.khi"
-version = "0.0.1-SNAPSHOT"
+allprojects {
+	apply {
+		plugin("kotlin")
+		plugin("org.jetbrains.kotlin.kapt")
+		plugin("org.springframework.boot")
+		plugin("io.spring.dependency-management")
+		plugin("org.jetbrains.kotlin.plugin.jpa")
+	}
 
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(17)
+	group = "com.khi.bs"
+	version = "0.0.1-SNAPSHOT"
+
+	repositories {
+		mavenCentral()
+		gradlePluginPortal()
+	}
+
+	dependencies {
+		val implementation by configurations
+		val testImplementation by configurations
+
+		implementation("org.jetbrains.kotlin:kotlin-reflect")
+		implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+
+		testImplementation("com.ninja-squad:springmockk:3.1.0")
+		testImplementation("org.springframework.boot:spring-boot-starter-test") {
+			exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
+			exclude(module = "mockito-core")
+		}
+	}
+
+	configure<JavaPluginExtension> {
+		sourceCompatibility = JavaVersion.VERSION_17
+		targetCompatibility = JavaVersion.VERSION_17
+	}
+
+	tasks.withType<KotlinCompile> {
+	}
+
+	tasks.withType<Test> {
+		useJUnitPlatform()
 	}
 }
 
-configurations {
-	compileOnly {
-		extendsFrom(configurations.annotationProcessor.get())
+subprojects {
+	repositories {
+		mavenCentral()
+	}
+	configure<org.gradle.api.tasks.SourceSetContainer> {
+		named("main") {
+			resources.srcDirs(rootProject.file("src/main/resources"))
+		}
 	}
 }
 
-repositories {
-	mavenCentral()
+tasks.withType<BootJar> {
+//	mainClass.set("com.khi.bs.BsApplicationKt")
+	enabled = false
 }
 
-dependencies {
-	// Spring Boot JPA
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
-	// Querydsl (Jakarta 지원 버전)
-	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-	kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
-
-	// 보안
-	implementation("org.springframework.boot:spring-boot-starter-security")
-
-	// Jakarta API 관련 라이브러리 (명확히 지정)
-	kapt("jakarta.annotation:jakarta.annotation-api:2.1.1")
-	kapt("jakarta.persistence:jakarta.persistence-api:3.1.0")
-
-	implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
-	implementation("org.jetbrains.kotlin:kotlin-reflect:1.9.20")
-
-	// Spring Boot Web
-	implementation("org.springframework.boot:spring-boot-starter-web")
-
-	// Hibernate (Spring Boot 3.x 호환 버전)
-	implementation("org.hibernate:hibernate-core:6.6.11.Final")
-
-	// 데이터베이스 (Oracle, 변경 필요시 다른 DB 드라이버 추가)
-	runtimeOnly("com.oracle.database.jdbc:ojdbc11")
-
-	// 개발 편의성
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
-
-	// 테스트 관련
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-}
-val generated = file("src/main/generated")
-// querydsl QClass 파일 생성 위치를 지정
-tasks.withType<JavaCompile> {
-	options.generatedSourceOutputDirectory.set(generated)
+tasks.withType<Jar>{
+	enabled = false
 }
 
-// kotlin source set 에 querydsl QClass 위치 추가
-sourceSets {
-	main {
-		kotlin.srcDirs += generated
-	}
-}
-
-// gradle clean 시에 QClass 디렉토리 삭제
-tasks.named("clean") {
-	doLast {
-		generated.deleteRecursively()
-	}
-}
-kapt {
-	generateStubs = true
-}
-
-kotlin {
-	compilerOptions {
-		freeCompilerArgs.addAll("-Xjsr305=strict")
-	}
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
+tasks.withType<Test>{
+	enabled = false
 }
