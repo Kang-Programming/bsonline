@@ -11,14 +11,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 open class SecurityConfig(private val bucketStoreAuthFilter: BucketStoreAuthFilter) {
 
-//    @Bean
-//    open fun filterChain(http: HttpSecurity): SecurityFilterChain {
-//        http
-//            .csrf { it.disable() }
-//            .authorizeHttpRequests { auth ->
-//                auth.anyRequest().permitAll() // 모든 요청을 허용
-//            }
-//            .addFilterBefore(bucketStoreAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
-//        return http.build()
-//    }
+    @Bean
+    open fun filterChain(http: HttpSecurity): SecurityFilterChain {
+        http
+            .csrf { it.disable() }
+            .authorizeHttpRequests { auth ->
+                auth.anyRequest().permitAll() // 모든 요청을 허용
+            }
+            .addFilterBefore(bucketStoreAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+        return http.build()
+    }
 }

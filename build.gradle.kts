@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
 	kotlin("jvm") version "2.1.20" apply false
@@ -75,4 +76,10 @@ tasks.withType<Jar>{
 
 tasks.withType<Test>{
 	enabled = false
+}
+
+tasks.withType<BootRun> {
+	group = "application" // 태스크 그룹 지정 (선택 사항)
+	description = "Runs the core application module." // 태스크 설명 (선택 사항)
+	dependsOn(":core:bootRun") // 루트의 bootRun이 :core:bootRun에 의존하도록 설정
 }
