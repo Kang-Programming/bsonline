@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
@@ -46,7 +47,14 @@ allprojects {
 		targetCompatibility = JavaVersion.VERSION_17
 	}
 
-	tasks.withType<KotlinCompile> {
+	tasks.withType<KotlinCompile>().configureEach { // configureEach 사용 권장 (Gradle 8.x+)
+		compilerOptions { // 'kotlinOptions' 대신 'compilerOptions' 사용
+			jvmTarget.set(JvmTarget.JVM_17) // 문자열 "17" 대신 JvmTarget enum 사용 및 .set() 메소드 사용
+			// 다른 컴파일러 옵션이 필요하다면 여기에 추가
+			// 예: freeCompilerArgs.add("-Xjsr305=strict")
+			// 예: apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1) // 사용하는 Kotlin 버전에 맞춰 설정 가능
+			// 예: languageVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_1)
+		}
 	}
 
 	tasks.withType<Test> {
